@@ -86,31 +86,15 @@ Tested portfolios: **Full** (4 actions), **Merged3** (spatiotemporal, cost-based
 - **R2, C2 and RC2** (long time windows) are close to the references; **C1 and RC1** show the largest deviations.
 - The 6.49% result is a **separate execution** that also fixes solver seed/threads and doubles the repair time limit, so its gain cannot be attributed to local search alone.
 
-## Limitations
-- No comparison against random or adaptive (ALNS-style) selectors with the same operators and repair, so the **contribution of the DQN is not isolated**.
-- Portfolio selection (Merged2) was made on the Solomon benchmark: results are exploratory, not an independent final test.
-- No independent training or search seeds; no statistical uncertainty estimates.
-- Gurobi size-limited license: some repair calls may fall back to greedy insertion, and the share of true Gurobi solutions is not measured.
-- Results concern 100-customer instances and a distance-based objective.
-
-## Repository Structure (to adapt)
-```
-├── src/              # DQN, destruction operators, Gurobi repair, local refinement
-├── instances/        # 80 synthetic instances (seed = 7i + 1) and generator
-├── results/          # per-instance results (final pipeline, configuration C1)
-├── figures/          # convergence, gap and route-map figures
-└── README.md
-```
-
-## Future Work
-- Controlled comparison: random, adaptive and DQN selection with identical operators and repair.
-- Independent seeds, validation set and untouched test instances.
-- Repair diagnostics: model sizes, status codes, share of Gurobi solutions.
-- Vehicle-minimizing objective and extension to healthcare and emergency transportation.
 
 ## Conclusion
-The framework provides a compact interface between learned destruction and MILP-based repair. On the 56 Solomon instances, mean distance deviations are 8.22% (four actions), 9.23% (three actions) and 7.55% (two actions), and 6.49% for the complete pipeline. These results are preliminary and descriptive: they do not isolate the contribution of the learned selector.
+This project investigates a hybrid approach to the Vehicle Routing Problem with Time Windows, combining DQN-based destruction-operator selection with MILP repair. Gurobi reconstructs the destroyed neighborhood within a limited time budget, while an insertion heuristic followed by a short non-learned LNS provides the initial solution. The agent learns from the distance change observed after each destroy-and-repair cycle, and learning is restricted to operator selection.
+
+On the 56 Solomon instances, the exploratory portfolio comparison yields mean distance deviations of 8.22% (four actions), 9.23% (three actions) and 7.55% (two actions). A separate complete-pipeline execution, with fixed solver settings, a doubled repair time limit and local refinement, yields 6.49%, using 510 vehicles against 405 in the references. These results are preliminary: they do not isolate the contribution of the DQN, and they cannot be compared like for like with references that prioritize fleet size.
+
+**Future work:** investigate when learned destruction-operator selection improves MILP-based repair, and extend the framework to other time-critical transportation problems, such as healthcare and emergency transportation scheduling.
 
 ## Requirements
-- Python 3.x, PyTorch, NumPy
-- Gurobi Optimizer (`gurobipy`); a full license is needed for neighborhoods above 2,000 variables
+- Python 3.12
+- PyTorch, NumPy
+- `gurobipy` 13.0.2 (`pip install gurobipy`). The pip version includes a size-limited license; a full or academic license is needed for larger repair models.
